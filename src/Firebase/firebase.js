@@ -1,6 +1,6 @@
 import firebase from 'firebase/compat/app'
 import 'firebase/compat/firestore'
-console.log('process.env.REACT_APP_FB_API_KEY:',process.env.REACT_APP_FB_API_KEY);
+
 const firebaseConfig = {
   apiKey: "AIzaSyDA6s78psA0Pu8wpZbP6z5SfaKSWfTXSjo",
   authDomain: "trello-950da.firebaseapp.com",
