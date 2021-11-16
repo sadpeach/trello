@@ -1,3 +1,4 @@
+// react material UI
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import CardActions from '@mui/material/CardActions';
@@ -5,7 +6,17 @@ import CardContent from '@mui/material/CardContent';
 import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
 import Grid from '@mui/material/Grid';
+
+// react
 import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom'
+
+//file
+import BoardForm from './boardForm';
+
+//firebase
+import { db } from '../Firebase/firebase';
+
 
 const bull = (
     <Box
@@ -16,10 +27,56 @@ const bull = (
     </Box>
 );
 
-
-export default function TrelloBoard({ boards }) {
+export default function DisplayBoard({ boards }) {
 
     const [displayBoard, setDisplayBoard] = useState([]);
+    const [open, setOpen] = useState(false);
+    const [selectedId, setSelectedId] = useState("");
+
+    const [name, setName] = useState('');
+    const [description, setDescription] = useState('');
+    const [maxDone, setMaxDone] = useState(0);
+    const [maxProgress, setMaxProgress] = useState(0);
+    const [maxToDo, setMaxtodo] = useState(0);
+
+    const attributes = {
+        open: open,
+        close: handleClose,
+        submit: handleSubmit,
+        purpose: "Edit Board",
+        selectedId: selectedId,
+        selected_name: name,
+        selected_description: description,
+        selected_maxDone: maxDone,
+        selected_maxToDo: maxToDo,
+        selected_maxProgress: maxProgress
+    }
+
+    const handleOpen = (id, name, description, todo, progress, done) => {
+        setOpen(true);
+        setSelectedId(id);
+        setName(name);
+        setDescription(description);
+        setMaxtodo(todo);
+        setMaxProgress(progress);
+        setMaxDone(done);
+    }
+
+    function handleSubmit(name, description, maxDone, maxProgress, maxToDo) {
+        db.collection("Board").doc(selectedId).update({
+            name: name,
+            description: description,
+            max_done: parseInt(maxDone),
+            max_inprogress: parseInt(maxProgress),
+            max_todo: parseInt(maxToDo),
+            cards: []
+        });
+        setOpen(false);
+    }
+
+    function handleClose() {
+        setOpen(false);
+    }
 
     useEffect(() => {
         setDisplayBoard(boards);
@@ -27,9 +84,9 @@ export default function TrelloBoard({ boards }) {
 
     return (
         <>
+            <BoardForm {...attributes} />
             <Box sx={{ flexGrow: 1 }}>
                 <Grid container spacing={{ xs: 1, md: 3 }} columns={{ xs: 1, sm: 8, md: 12 }}>
-                    {console.log('boards:', displayBoard)}
                     {displayBoard.map((board, index) => {
                         return <Grid item xs={2} sm={4} md={4} key={index}>
                             <Card key={board.key} sx={{ minWidth: 275 }}>
@@ -48,8 +105,10 @@ export default function TrelloBoard({ boards }) {
                                     </Typography>
                                 </CardContent>
                                 <CardActions>
-                                    <Button size="small">Enter</Button>
-                                    <Button size="small">Edit</Button>
+                                    <Link to={`/board/` + board.key} style={{ textDecoration: 'none' }}>
+                                        <Button size="small">Enter</Button>
+                                    </Link>
+                                    <Button size="small" onClick={() => handleOpen(board.key, board.name, board.description, board.max_todo, board.max_inprogress, board.max_done)}>Edit</Button>
                                 </CardActions>
                             </Card>
                         </Grid>;
