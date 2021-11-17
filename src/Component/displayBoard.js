@@ -87,8 +87,8 @@ export default function DisplayBoard({ boards }) {
             <BoardForm {...attributes} />
             <Box sx={{ flexGrow: 1 }}>
                 <Grid container spacing={{ xs: 1, md: 3 }} columns={{ xs: 1, sm: 8, md: 12 }}>
-                    {displayBoard.map((board, index) => {
-                        return <Grid item xs={2} sm={4} md={4} key={index}>
+                    {displayBoard.map((board, index) => (
+                         <Grid item xs={2} sm={4} md={4} key={index}>
                             <Card key={board.key} sx={{ minWidth: 275 }}>
                                 <CardContent>
                                     <Typography sx={{ fontSize: 14 }} color="text.secondary" gutterBottom>
@@ -111,8 +111,8 @@ export default function DisplayBoard({ boards }) {
                                     <Button size="small" onClick={() => handleOpen(board.key, board.name, board.description, board.max_todo, board.max_inprogress, board.max_done)}>Edit</Button>
                                 </CardActions>
                             </Card>
-                        </Grid>;
-                    })}
+                        </Grid>
+                    ))}
                 </Grid>
             </Box>
 
