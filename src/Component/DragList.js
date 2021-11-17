@@ -97,7 +97,7 @@ export default function DragList({ boardid }) {
     // manipulate the list ordering
     const { destination, source } = result;
 
-    if (!destination || (source.droppableId != destination.droppableId && elements[destination.droppableId].max <= elements[destination.droppableId].cards.length)) {
+    if (!destination || (source.droppableId !== destination.droppableId && elements[destination.droppableId].max <= elements[destination.droppableId].cards.length)) {
       console.log('max reached');
       return (
         <>
