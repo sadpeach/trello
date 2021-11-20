@@ -11,8 +11,6 @@ export default function KanBan() {
 
     return (
         <>
-        <CardForm boardid = {boardid}/>
-
         <DragList boardid = {boardid}/>
         </>
     )

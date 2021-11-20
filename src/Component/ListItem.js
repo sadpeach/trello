@@ -7,13 +7,28 @@ import Typography from '@mui/material/Typography';
 import { Draggable } from "react-beautiful-dnd";
 
 
-const ListItem = ({ item, index }) => {
+function ContentCard ({provided,snapshot,item}){
+    
+    function  onClickDelete (key) {
+        console.log('deleting:',key);
+
+        let temp = JSON.parse(localStorage.getItem("selectedBoard"));
+        let res = temp.cards.filter(item => item.key != key);
+        temp.cards = res
+        localStorage.setItem("selectedBoard",JSON.stringify(temp));
+
+        let boards = JSON.parse(localStorage.getItem('boards'));
+        boards.find((object, index) => {
+            if (object.key === temp.key) {
+                object.cards = temp.cards;
+                return true; 
+            }
+        });
+        localStorage.setItem("boards",JSON.stringify(boards));
+    }
+
     return (
-        <Draggable draggableId={item.id} index={index}>
-            {(provided, snapshot) => {
-                return (
-                    <>
-                        <Card sx={{ minWidth: 275 }} ref={provided.innerRef}
+        <Card sx={{ minWidth: 275 }} ref={provided.innerRef}
                             snapshot={snapshot}
                             {...provided.draggableProps}
                             {...provided.dragHandleProps}>
@@ -29,9 +44,19 @@ const ListItem = ({ item, index }) => {
                                 </Typography>
                             </CardContent>
                             <CardActions>
-                                <Button size="small">Delete</Button>
+                                <Button size="small" onClick={()=>onClickDelete(item.key)}>Delete</Button>
                             </CardActions>
                         </Card>
+    )
+}
+
+const ListItem = ({ item, index }) => {
+    return (
+        <Draggable draggableId={item.id.toString()} index={index}>
+            {(provided, snapshot) => {
+                return (
+                    <>
+                        <ContentCard provided={provided} snapshot={snapshot} item={item}/>
 
                     </>
                 );

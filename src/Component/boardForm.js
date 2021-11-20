@@ -20,7 +20,6 @@ export default function BoardForm(props) {
     const [maxToDo, setMaxtodo] = useState(0);
 
     useEffect(() => {
-
         setName(props.selected_name);
         setDescription(props.selected_description);
         setMaxDone(props.selected_maxDone);

@@ -10,12 +10,15 @@ import DisplayBoard from '../Component/displayBoard';
 import BoardForm from '../Component/boardForm';
 
 //firebase
-import { db } from '../Firebase/firebase';
-
 export default function Home() {
+
     const [open, setOpen] = useState(false);
     const [boards, setBoards] = useState([]);
-    const [loadDB, setLoadDB] = useState(true);
+    
+    useEffect(() => {
+        localStorage.setItem("boards", JSON.stringify(boards));
+        localStorage.setItem("selectedBoard", JSON.stringify({}));
+    }, [boards]);
 
     const attributes = {
         open: open,
@@ -32,37 +35,22 @@ export default function Home() {
 
     const handleOpen = () => setOpen(true);
 
-    useEffect(() => {
-        const getAllBoards = [];
-        const boards = db
-            .collection("Board")
-            .onSnapshot((querySnapshot) => {
-                querySnapshot.forEach((doc) => {
-                    getAllBoards.push({
-                        ...doc.data(),
-                        key: doc.id,
-                    });
-                });
-                setBoards(getAllBoards);
-                setLoadDB(false);
-            });
-        return () => boards();
-    }, [loadDB]);
-
     function handleClose() {
         setOpen(false);
     }
 
     function handleSubmit(name, description, maxDone, maxProgress, maxToDo) {
-        db.collection("Board").add({
+        const newboard = {
+            key: Math.floor((Math.random() * 1000) + 1),
             name: name,
             description: description,
             max_done: parseInt(maxDone),
             max_inprogress: parseInt(maxProgress),
             max_todo: parseInt(maxToDo),
-            cards: []
-        });
-        setOpen(false);
+            cards:[]
+        }
+        setBoards(oldBoard => [...oldBoard, newboard]);
+        setOpen(false); 
     }
 
     return (

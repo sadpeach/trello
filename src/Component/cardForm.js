@@ -1,6 +1,6 @@
 
 //react import
-import React, {useState } from 'react';
+import React, {useEffect, useState } from 'react';
 
 //material ui import
 import TextField from '@mui/material/TextField';
@@ -10,14 +10,36 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
 import Button from '@mui/material/Button';
 
-export default function CardForm() {
+export default function CardForm({prefix}) {
+    console.log('prefix:',prefix);
 
-    const [open, setOpen] = React.useState(false);
+    const [open, setOpen] = useState(false);
     const [name, setName] = useState('');
     const [description, setDescription] = useState('');
 
     const handleClickOpen = () => {
         setOpen(true);
+    };
+
+    const handleCreate = () => {
+        const newCard = {
+            key: Math.floor((Math.random() * 1000) + 1),
+            card_name: name,
+            card_description: description,
+            card_column : prefix
+        }
+        let temp = JSON.parse(localStorage.getItem("selectedBoard"));
+        temp.cards.push(newCard);
+        localStorage.setItem("selectedBoard",JSON.stringify(temp));
+        let boards = JSON.parse(localStorage.getItem('boards'));
+        boards.find((object, index) => {
+            if (object.key === temp.key) {
+                object.cards = temp.cards;
+                return true; 
+            }
+        });
+        localStorage.setItem("boards",JSON.stringify(boards));
+        setOpen(false);
     };
 
     const handleClose = () => {
@@ -58,7 +80,7 @@ export default function CardForm() {
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={handleClose}>Cancel</Button>
-                    <Button onClick={handleClose}>Create</Button>
+                    <Button onClick={handleCreate}>Create</Button>
                 </DialogActions>
             </Dialog>
 

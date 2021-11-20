@@ -7,13 +7,11 @@ import { DragDropContext } from "react-beautiful-dnd";
 //import file
 import DraggableElement from "./DraggableElements";
 
-//import firebase
-import { db } from '../Firebase/firebase';
-
 //import material ui
 import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
 import { Snackbar } from "@mui/material";
+import Button from '@mui/material/Button';
 
 const lists = ["todo", "inProgress", "done"];
 
@@ -30,17 +28,18 @@ const addToList = (list, index, element) => {
 };
 
 const generateLists = (cards, done, progress, todo) => {
+  console.log('the cards are:',cards)
   let sortedArr = { done: { max: done, cards: [] }, todo: { max: todo, cards: [] }, inProgress: { max: progress, cards: [] } };
   for (let k in cards) {
     cards[k].id = cards[k].key
     switch (cards[k].card_column) {
-      case 1:
+      case "done":
         sortedArr.done.cards.push(cards[k])
         break;
-      case 2:
+      case "inProgress":
         sortedArr.inProgress.cards.push(cards[k])
         break;
-      case 3:
+      case "todo":
         sortedArr.todo.cards.push(cards[k])
         break;
       default:
@@ -53,41 +52,24 @@ const generateLists = (cards, done, progress, todo) => {
 
 export default function DragList({ boardid }) {
 
+  let allboards = JSON.parse(localStorage.getItem('boards'));
+  const selectedBoard = allboards.find(obj => obj.key === parseInt(boardid));
   const [elements, setElements] = useState(generateLists());
   const [cards, setCards] = useState([]);
-  const [loadDB, setLoadDB] = useState(true);
   const [maxDone, setMaxDone] = useState(0);
   const [maxProgress, setMaxProgress] = useState(0);
   const [maxTodo, setToDo] = useState(0);
 
+
   useEffect(() => {
-    const getAllCards = [];
+    
+    setCards(selectedBoard.cards);
+    setMaxDone(selectedBoard.max_done);
+    setMaxProgress(selectedBoard.max_inprogress);
+    setToDo(selectedBoard.max_todo);
 
-    db
-      .collection("Board")
-      .doc(boardid)
-      .collection('cards')
-      .onSnapshot((querySnapshot) => {
-        querySnapshot.forEach((doc) => {
-          getAllCards.push({
-            ...doc.data(),
-            key: doc.id,
-          });
-        });
-        setCards(getAllCards);
-        setLoadDB(false);
-      });
-
-    db
-      .collection("Board")
-      .doc(boardid)
-      .onSnapshot(docSnapshot => {
-        setMaxDone(docSnapshot.get('max_done'));
-        setMaxProgress(docSnapshot.get('max_inprogress'));
-        setToDo(docSnapshot.get('max_todo'));
-      })
-
-  }, [loadDB, boardid, maxDone, maxProgress, maxTodo]);
+    localStorage.setItem('selectedBoard',JSON.stringify(selectedBoard));
+  }, [maxDone,maxProgress,maxTodo]);
 
   useEffect(() => {
     setElements(generateLists(cards, maxDone, maxProgress, maxTodo));
@@ -131,7 +113,6 @@ export default function DragList({ boardid }) {
       <Grid container spacing={{ xs: 1, md: 3 }} columns={{ xs: 1, sm: 8, md: 12 }}>
         <DragDropContext onDragEnd={onDragEnd}>
           {lists.map((listKey, index) => (
-
             <Grid item xs={2} sm={4} md={4} key={index}>
               {/* make this area droppable */}
               <DraggableElement
@@ -140,6 +121,7 @@ export default function DragList({ boardid }) {
                 key={listKey}
                 prefix={listKey}
               />
+
             </Grid>
           ))}
         </DragDropContext>
