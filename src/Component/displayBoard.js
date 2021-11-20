@@ -29,7 +29,7 @@ const bull = (
 
 export default function DisplayBoard({ boards }) {
 
-    const [displayBoard, setDisplayBoard] = useState([]);
+    const [displayBoard, setDisplayBoard] = useState(boards);
     const [open, setOpen] = useState(false);
     const [selectedId, setSelectedId] = useState("");
 
@@ -38,6 +38,10 @@ export default function DisplayBoard({ boards }) {
     const [maxDone, setMaxDone] = useState(0);
     const [maxProgress, setMaxProgress] = useState(0);
     const [maxToDo, setMaxtodo] = useState(0);
+
+    useEffect(() => {
+        setDisplayBoard(boards);
+    }, [boards]);
 
     const attributes = {
         open: open,
@@ -63,14 +67,24 @@ export default function DisplayBoard({ boards }) {
     }
 
     function handleSubmit(name, description, maxDone, maxProgress, maxToDo) {
-        db.collection("Board").doc(selectedId).update({
-            name: name,
-            description: description,
-            max_done: parseInt(maxDone),
-            max_inprogress: parseInt(maxProgress),
-            max_todo: parseInt(maxToDo),
-            cards: []
-        });
+
+        let temp = displayBoard;
+        temp.find((obj, index) => {
+            if (obj.key === selectedId) {
+                temp[index] = {
+                    key: selectedId,
+                    name: name,
+                    description: description,
+                    max_done: parseInt(maxDone),
+                    max_inprogress: parseInt(maxProgress),
+                    max_todo: parseInt(maxToDo),
+                    cards :[]
+                };
+                return true;
+            }
+        })
+        setDisplayBoard(temp);
+        localStorage.setItem('boards', JSON.stringify(displayBoard));
         setOpen(false);
     }
 
@@ -78,40 +92,40 @@ export default function DisplayBoard({ boards }) {
         setOpen(false);
     }
 
-    useEffect(() => {
-        setDisplayBoard(boards);
-    }, [boards]);
-
     return (
         <>
             <BoardForm {...attributes} />
             <Box sx={{ flexGrow: 1 }}>
+                {console.log('current displayboard:',displayBoard)}
                 <Grid container spacing={{ xs: 1, md: 3 }} columns={{ xs: 1, sm: 8, md: 12 }}>
-                    {displayBoard.map((board, index) => (
-                         <Grid item xs={2} sm={4} md={4} key={index}>
-                            <Card key={board.key} sx={{ minWidth: 275 }}>
-                                <CardContent>
-                                    <Typography sx={{ fontSize: 14 }} color="text.secondary" gutterBottom>
-                                        {board.name}
-                                    </Typography>
-                                    <Typography variant="h5" component="div">
-                                        {board.name}
-                                    </Typography>
-                                    <Typography sx={{ mb: 1.5 }} color="text.secondary">
-                                        ToDo : {board.max_todo} {bull} In Progress : {board.max_inprogress} {bull} Done : {board.max_done}
-                                    </Typography>
-                                    <Typography variant="body2">
-                                        {board.description}
-                                    </Typography>
-                                </CardContent>
-                                <CardActions>
-                                    <Link to={`/board/` + board.key} style={{ textDecoration: 'none' }}>
-                                        <Button size="small">Enter</Button>
-                                    </Link>
-                                    <Button size="small" onClick={() => handleOpen(board.key, board.name, board.description, board.max_todo, board.max_inprogress, board.max_done)}>Edit</Button>
-                                </CardActions>
-                            </Card>
-                        </Grid>
+                    {displayBoard?.map((board, index) => (
+                        <>
+                            <Grid item xs={2} sm={4} md={4} key={index}>
+                                {console.log('board key:', board.key)}
+                                <Card key={board.key} sx={{ minWidth: 275 }}>
+                                    <CardContent>
+                                        <Typography sx={{ fontSize: 14 }} color="text.secondary" gutterBottom>
+                                            {board.name}
+                                        </Typography>
+                                        <Typography variant="h5" component="div">
+                                            {board.name}
+                                        </Typography>
+                                        <Typography sx={{ mb: 1.5 }} color="text.secondary">
+                                            ToDo : {board.max_todo} {bull} In Progress : {board.max_inprogress} {bull} Done : {board.max_done}
+                                        </Typography>
+                                        <Typography variant="body2">
+                                            {board.description}
+                                        </Typography>
+                                    </CardContent>
+                                    <CardActions>
+                                        <Link to={`/board/` + board.key} style={{ textDecoration: 'none' }}>
+                                            <Button size="small">Enter</Button>
+                                        </Link>
+                                        <Button size="small" onClick={() => handleOpen(board.key, board.name, board.description, board.max_todo, board.max_inprogress, board.max_done)}>Edit</Button>
+                                    </CardActions>
+                                </Card>
+                            </Grid>
+                        </>
                     ))}
                 </Grid>
             </Box>
