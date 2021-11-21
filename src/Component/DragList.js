@@ -6,12 +6,12 @@ import { DragDropContext } from "react-beautiful-dnd";
 
 //import file
 import DraggableElement from "./DraggableElements";
+import CustomizedSnackbars from "./snackBar";
 
 //import material ui
 import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
-import { Snackbar } from "@mui/material";
-import Button from '@mui/material/Button';
+
 
 const lists = ["todo", "inProgress", "done"];
 
@@ -21,17 +21,9 @@ const removeFromList = (list, index) => {
   return [removed, result];
 };
 
-const addToList = (list, index, element) => {
-  const result = { ...list };
-  result.cards.splice(index, 0, element);
-  return result;
-};
-
 const generateLists = (cards, done, progress, todo) => {
-  console.log('the cards are:',cards)
   let sortedArr = { done: { max: done, cards: [] }, todo: { max: todo, cards: [] }, inProgress: { max: progress, cards: [] } };
   for (let k in cards) {
-    cards[k].id = cards[k].key
     switch (cards[k].card_column) {
       case "done":
         sortedArr.done.cards.push(cards[k])
@@ -50,44 +42,62 @@ const generateLists = (cards, done, progress, todo) => {
   return sortedArr
 }
 
-export default function DragList({ boardid }) {
-
-  let allboards = JSON.parse(localStorage.getItem('boards'));
-  const selectedBoard = allboards.find(obj => obj.key === parseInt(boardid));
+export default function DragList({ selectedBoard }) {
   const [elements, setElements] = useState(generateLists());
-  const [cards, setCards] = useState([]);
-  const [maxDone, setMaxDone] = useState(0);
-  const [maxProgress, setMaxProgress] = useState(0);
-  const [maxTodo, setToDo] = useState(0);
+  const [cards, setCards] = useState(selectedBoard.cards);
+  const [maxDone] = useState(selectedBoard.max_done);
+  const [maxProgress] = useState(selectedBoard.max_inprogress);
+  const [maxTodo] = useState(selectedBoard.max_todo);
+  const [isMax, setIsMax] = useState(0);
 
+  function ListenNewBoard(newboard) {
+    setCards(newboard.cards);
+  }
 
-  useEffect(() => {
-    
-    setCards(selectedBoard.cards);
-    setMaxDone(selectedBoard.max_done);
-    setMaxProgress(selectedBoard.max_inprogress);
-    setToDo(selectedBoard.max_todo);
+  const addToList = (list, index, element, destination) => {
 
-    localStorage.setItem('selectedBoard',JSON.stringify(selectedBoard));
-  }, [maxDone,maxProgress,maxTodo]);
+    cards.find((object, index) => {
+      if (object.key === element.key) {
+        object.card_column = destination;
+        return true;
+      }
+      return false;
+    });
+
+    const result = { ...list };
+    result.cards.splice(index, 0, element);
+    return result;
+  };
 
   useEffect(() => {
     setElements(generateLists(cards, maxDone, maxProgress, maxTodo));
+
   }, [cards, maxDone, maxProgress, maxTodo]);
+
+  useEffect(() => {
+    selectedBoard.cards = cards;
+    localStorage.setItem('selectedBoard', JSON.stringify(selectedBoard));
+    const allboards = JSON.parse(localStorage.getItem('boards'));
+    allboards.find((object, index) => {
+      if (object.key === selectedBoard.key) {
+        console.log('match key');
+        object.cards = selectedBoard.cards;
+        return true;
+      }
+      return false;
+    });
+    localStorage.setItem('boards', JSON.stringify(allboards));
+  });
 
   const onDragEnd = (result) => {
     // manipulate the list ordering
     const { destination, source } = result;
 
     if (!destination || (source.droppableId !== destination.droppableId && elements[destination.droppableId].max <= elements[destination.droppableId].cards.length)) {
-      console.log('max reached');
-      return (
-        <>
-          <Snackbar message="You hav reached the max" />
-        </>
-      )
-
+      setIsMax(1);
+      return true;
     }
+
     const listCopy = { ...elements }; //all columns
 
     const sourceList = listCopy[source.droppableId];//change the ordering of list
@@ -102,31 +112,43 @@ export default function DragList({ boardid }) {
     listCopy[destination.droppableId] = addToList(
       destinationList,
       destination.index,
-      removedElement
+      removedElement,
+      destination.droppableId
     );
 
     setElements(listCopy);
+    setIsMax(0);
   };
 
-  return (
-    <Box sx={{ flexGrow: 1 }}>
-      <Grid container spacing={{ xs: 1, md: 3 }} columns={{ xs: 1, sm: 8, md: 12 }}>
-        <DragDropContext onDragEnd={onDragEnd}>
-          {lists.map((listKey, index) => (
-            <Grid item xs={2} sm={4} md={4} key={index}>
-              {/* make this area droppable */}
-              <DraggableElement
-                // list and item
-                elements={elements[listKey].cards}
-                key={listKey}
-                prefix={listKey}
-              />
+  function handleDelete(newboard) {
+    setCards(newboard.cards);
+  }
 
-            </Grid>
-          ))}
-        </DragDropContext>
-      </Grid>
-    </Box>
+  return (
+    <>
+      <Box sx={{ flexGrow: 1 }}>
+        <Grid container spacing={{ xs: 1, md: 3 }} columns={{ xs: 1, sm: 8, md: 12 }}>
+          <DragDropContext onDragEnd={onDragEnd}>
+            {lists.map((listKey, index) => (
+              <Grid item xs={2} sm={4} md={4} key={index}>
+                {/* make this area droppable */}
+                <DraggableElement
+                  // list and item
+                  handleDelete={handleDelete}
+                  newBoard={ListenNewBoard}
+                  elements={elements[listKey].cards}
+                  key={listKey}
+                  prefix={listKey}
+                />
+
+              </Grid>
+            ))}
+          </DragDropContext>
+        </Grid>
+      </Box>
+      {isMax ? <CustomizedSnackbars msg={"Exceed max cards set for the column"} /> : null}
+
+    </>
 
 
   );
