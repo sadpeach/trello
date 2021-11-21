@@ -93,12 +93,10 @@ export default function DisplayBoard({ boards }) {
         <>
             <BoardForm {...attributes} />
             <Box sx={{ flexGrow: 1 }}>
-                {console.log('current displayboard:',displayBoard)}
                 <Grid container spacing={{ xs: 1, md: 3 }} columns={{ xs: 1, sm: 8, md: 12 }}>
                     {displayBoard?.map((board, index) => (
                         <>
                             <Grid item xs={2} sm={4} md={4} key={index}>
-                                {console.log('board key:', board.key)}
                                 <Card key={board.key} sx={{ minWidth: 275 }}>
                                     <CardContent>
                                         <Typography sx={{ fontSize: 14 }} color="text.secondary" gutterBottom>

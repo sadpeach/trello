@@ -11,8 +11,6 @@ import DialogTitle from '@mui/material/DialogTitle';
 import Button from '@mui/material/Button';
 
 export default function CardForm({ prefix, newBoard }) {
-    console.log('prefix:', prefix);
-
     const [open, setOpen] = useState(false);
     const [name, setName] = useState('');
     const [description, setDescription] = useState('');

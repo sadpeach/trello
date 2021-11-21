@@ -80,7 +80,6 @@ export default function DragList({ selectedBoard }) {
     const allboards = JSON.parse(localStorage.getItem('boards'));
     allboards.find((object, index) => {
       if (object.key === selectedBoard.key) {
-        console.log('match key');
         object.cards = selectedBoard.cards;
         return true;
       }
