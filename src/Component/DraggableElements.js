@@ -6,7 +6,6 @@ import CardForm from "./cardForm";
 
 const DraggableElement = ({ prefix, elements ,newBoard,handleDelete}) => (
   <div style={{ padding: "10px", background: "green" }}>
-    {console.log('handling delete:',handleDelete)}
     <Typography variant="h5" component="div">{prefix}</Typography>
     {/* This element contains your list and the drop zone that \
     will be the source when elements are dropped. */}
