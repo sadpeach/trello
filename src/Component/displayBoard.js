@@ -14,10 +14,6 @@ import { Link } from 'react-router-dom'
 //file
 import BoardForm from './boardForm';
 
-//firebase
-import { db } from '../Firebase/firebase';
-
-
 const bull = (
     <Box
         component="span"
@@ -82,6 +78,7 @@ export default function DisplayBoard({ boards }) {
                 };
                 return true;
             }
+            return false;
         })
         setDisplayBoard(temp);
         localStorage.setItem('boards', JSON.stringify(displayBoard));

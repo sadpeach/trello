@@ -1,6 +1,6 @@
 
 //react import
-import React, {useEffect, useState } from 'react';
+import React, { useState } from 'react';
 
 //material ui import
 import TextField from '@mui/material/TextField';
@@ -10,8 +10,8 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
 import Button from '@mui/material/Button';
 
-export default function CardForm({prefix}) {
-    console.log('prefix:',prefix);
+export default function CardForm({ prefix, newBoard }) {
+    console.log('prefix:', prefix);
 
     const [open, setOpen] = useState(false);
     const [name, setName] = useState('');
@@ -26,19 +26,23 @@ export default function CardForm({prefix}) {
             key: Math.floor((Math.random() * 1000) + 1),
             card_name: name,
             card_description: description,
-            card_column : prefix
+            card_column: prefix
         }
         let temp = JSON.parse(localStorage.getItem("selectedBoard"));
         temp.cards.push(newCard);
-        localStorage.setItem("selectedBoard",JSON.stringify(temp));
+        localStorage.setItem("selectedBoard", JSON.stringify(temp));
         let boards = JSON.parse(localStorage.getItem('boards'));
         boards.find((object, index) => {
             if (object.key === temp.key) {
                 object.cards = temp.cards;
-                return true; 
+                return true;
             }
+            return false;
         });
-        localStorage.setItem("boards",JSON.stringify(boards));
+        localStorage.setItem("boards", JSON.stringify(boards));
+        setName("");
+        setDescription("");
+        newBoard(temp);
         setOpen(false);
     };
 

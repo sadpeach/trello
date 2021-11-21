@@ -7,13 +7,10 @@ import Typography from '@mui/material/Typography';
 import { Draggable } from "react-beautiful-dnd";
 
 
-function ContentCard ({provided,snapshot,item}){
-    
+function ContentCard ({provided,snapshot,item,handleDelete}){
     function  onClickDelete (key) {
-        console.log('deleting:',key);
-
         let temp = JSON.parse(localStorage.getItem("selectedBoard"));
-        let res = temp.cards.filter(item => item.key != key);
+        let res = temp.cards.filter(item => item.key !== key);
         temp.cards = res
         localStorage.setItem("selectedBoard",JSON.stringify(temp));
 
@@ -23,8 +20,10 @@ function ContentCard ({provided,snapshot,item}){
                 object.cards = temp.cards;
                 return true; 
             }
+            return false;
         });
         localStorage.setItem("boards",JSON.stringify(boards));
+        handleDelete(temp);
     }
 
     return (
@@ -50,13 +49,13 @@ function ContentCard ({provided,snapshot,item}){
     )
 }
 
-const ListItem = ({ item, index }) => {
+const ListItem = ({ item, index,handleDelete }) => {
     return (
-        <Draggable draggableId={item.id.toString()} index={index}>
+        <Draggable draggableId={item.key.toString()} index={index}>
             {(provided, snapshot) => {
                 return (
                     <>
-                        <ContentCard provided={provided} snapshot={snapshot} item={item}/>
+                        <ContentCard provided={provided} snapshot={snapshot} item={item} handleDelete={handleDelete}/>
 
                     </>
                 );
